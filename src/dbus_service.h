@@ -7,12 +7,11 @@ class DBusService : public QDBusAbstractAdaptor
 public:
         explicit DBusService(QObject* parent);
 public slots:
-    
-    void RegisterService(const QString &name, const QStringList &supportedFormats);
+    void RegisterService(const QString& name, const QString& pathToExe, const QStringList& supportedFormats);
     void OpenFile(const QString &path);
     void OpenFileUsingService(const QString &path, const QString &service);
 
 private:
-    QMap<QString, QStringList> registeredServices;
+    //QMap<QString, QStringList> registeredServices;
 };
 

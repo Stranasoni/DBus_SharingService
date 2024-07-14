@@ -11,11 +11,11 @@ find_package(Qt6 REQUIRED COMPONENTS Core DBus)
 
 qt_standard_project_setup()
 
-qt_add_executable(helloworld
+qt_add_executable(dbus_service
     src/main.cpp
     src/dbus_service.h
     src/dbus_service.cpp
 )
 
-target_link_libraries(helloworld PRIVATE Qt6::Core Qt6::DBus)
+target_link_libraries(dbus_service PRIVATE Qt6::Core Qt6::DBus)
 
