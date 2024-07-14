@@ -1,7 +1,7 @@
 #include "dbus_service.h"
 #include <QtDBus/QDBusConnection>
 #include <QtDebug>
-
+#include <iostream>
 
 
 
@@ -10,36 +10,33 @@ DBusService::DBusService(QObject* parent) : QDBusAbstractAdaptor(parent)
     QDBusConnection dbus_connection = QDBusConnection::sessionBus();
     if (!dbus_connection.interface()->isServiceRegistered(QStringLiteral("com.system.sharing")))
     {
-        dbus_connection.registerObject(QStringLiteral("com/system/sharing"), parent);
         dbus_connection.registerService(QStringLiteral("com.system.sharing"));
+        dbus_connection.registerObject(QStringLiteral("/"), "com.system.sharing", parent, 
+        QDBusConnection::ExportAdaptors | QDBusConnection::ExportAllSignals);
         qDebug() << "new service register";
     }
     else 
         qDebug() << "service already exists";
          
 }
-
+//вывод ошибок в том же терминале откуда открывалось приложение
 void DBusService::RegisterService(const QString& name, const QString& pathToExe, const QStringList& supportedFormats)
 {
     //поиск среди зарегистрированных сервисов
-    QFile file("registeredServices");
+    QFile file("/home/ubuntu/Documents/dbusold/src/registeredServices.txt");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text ))
     {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, 
-        "Не удалось проверить список зарегистрированных сервисов,\
-                    к сожалению в таком случае продолжить не можем");
-        QDBusConnection::sessionBus().send(warning);
+        qDebug()<<"Не удалось проверить список зарегистрированных сервисов, к сожалению в таком случае продолжить не можем";       
         return;
     }
-    QTextStream in(&file);
-    while(!in.atEnd())
+   
+    QTextStream in_reg_file(&file);
+    while(!in_reg_file.atEnd())
     {
-        QString line = in.readLine();
+        QString line = in_reg_file.readLine();
         if(line.trimmed() == name)
         {
-            QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, 
-                "Сервис с таким именем уже зарегистрирован");
-            QDBusConnection::sessionBus().send(warning);
+            qDebug()<<"Сервис с таким именем уже зарегистрирован";
             file.close();
             return;
         }
@@ -59,39 +56,33 @@ void DBusService::RegisterService(const QString& name, const QString& pathToExe,
     file.setFileName(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, 
-            "Не удалось зарегистрировать сервис");
-        QDBusConnection::sessionBus().send(warning);    
+        qDebug()<< "Не удалось зарегистрировать сервис";
         return;
     }
-    QTextStream out(&file);
-    out << configure_text;
+    QTextStream out_conf_file(&file);
+    out_conf_file << configure_text;
     file.close();
     
     /*в специальном файле будут храниться имена
     зарегистрированных сервисов-обработчиков*/
-    file.setFileName("registeredServices");
+    file.setFileName("/home/ubuntu/Documents/dbusold/src/registeredServices.txt");
     if(!file.open(QIODevice::Append | QIODevice::Text))
     {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, 
-            "Сторонний сервис зарегистрирован, но информацию о его присутствие не удалось сохранить");
-        QDBusConnection::sessionBus().send(warning);    
+        qDebug()<<"Сторонний сервис зарегистрирован, но информацию о его присутствие не удалось сохранить";
         return;
     }
-    QTextStream out (&file);
-    out << name + "\n";
+    QTextStream out_reg_file(&file);
+    out_reg_file << name + "\n";
     file.close();
     qDebug()<<"Новый сервис успешно зарегистрирован";
-
+    
 }
 
 void DBusService::OpenFileUsingService(const QString &path, const QString &service)
 {
     //проверка существования файла
     if (!QFile::exists(path)) {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, 
-        "Файл не существует");
-        QDBusConnection::sessionBus().send(warning);
+        qDebug()<<"Файл не существует";
         return;
     }
 
@@ -102,8 +93,7 @@ void DBusService::OpenFileUsingService(const QString &path, const QString &servi
     QFile file(file_path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed,"Не удалось найти сторонний сервис");
-        QDBusConnection::sessionBus().send(warning);
+        qDebug()<<"Не удалось найти сторонний сервис";
         return;
     }
     QTextStream in(&file);
@@ -122,8 +112,7 @@ void DBusService::OpenFileUsingService(const QString &path, const QString &servi
     file.close();
     if(!format_supported)
     {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed,"Сервис не поддерживает данный формат файлов");
-        QDBusConnection::sessionBus().send(warning);
+        qDebug()<<"Сервис не поддерживает данный формат файлов";
         return;
     }
     //запуск сервера если он не запущен
@@ -133,10 +122,8 @@ void DBusService::OpenFileUsingService(const QString &path, const QString &servi
     {
         if(!o_interface->startService(service).isValid())
         {
-           QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, "Не удалось запустить сервис");
-           QDBusConnection::sessionBus().send(warning);
-           return;
-
+            qDebug()<<"Не удалось запустить сервис";     
+            return;
         }
     }
     //вызов метода открыти файла у сервиса
@@ -144,8 +131,7 @@ void DBusService::OpenFileUsingService(const QString &path, const QString &servi
     QDBusReply<void> dbus_replay = iface.call("OpenFile",path);
     if(!dbus_replay.isValid())
     {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed,
-        "Не удалось вызвать метод открытия файла: " + dbus_replay.error().message());
+        qDebug()<<"Не удалось вызвать метод открытия файла: " + dbus_replay.error().message();
     }
 
 
@@ -153,22 +139,19 @@ void DBusService::OpenFileUsingService(const QString &path, const QString &servi
 
 }
 
-void OpenFile(const QString &path)
+void DBusService::OpenFile(const QString &path)
 {
     //проверка существования файла
     if (!QFile::exists(path)) {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, 
-        "Файл не существует");
-        QDBusConnection::sessionBus().send(warning);
+        qDebug() << "Файл не существует";
         return;
     }
     QString extension = QFileInfo(path).suffix();
 
     //поиск зарегистрированных сервисов поддерживающих заданное расширение
-    QFile my_reg_file("registeredServices");
+    QFile my_reg_file("/home/ubuntu/Documents/dbusold/src/registeredServices.txt");
     if (!my_reg_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, "Не удалось проверить список зарегистрированных сервисов");
-        QDBusConnection::sessionBus().send(warning);
+        qDebug() <<  "Не удалось проверить список зарегистрированных сервисов";
         return;
     }
     QTextStream in(&my_reg_file);
@@ -199,9 +182,7 @@ void OpenFile(const QString &path)
 
     if(services.isEmpty())
     {
-        QDBusMessage reply = QDBusMessage::createError(QDBusError::Failed, 
-        "Подходящий сервис не найден");
-        QDBusConnection::sessionBus().send(reply);
+        qDebug() << "Подходящий сервис не найден";
         return;
     }
     //выбор случайного сервиса
@@ -214,8 +195,7 @@ void OpenFile(const QString &path)
     {
         if(!o_interface->startService(selected_service ).isValid())
         {
-           QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed, "Не удалось запустить сервис");
-           QDBusConnection::sessionBus().send(warning);
+           qDebug() << "Не удалось запустить сервис";
            return;
 
         }
@@ -225,8 +205,7 @@ void OpenFile(const QString &path)
     QDBusReply<void> dbus_replay = iface.call("OpenFile",path);
     if(!dbus_replay.isValid())
     {
-        QDBusMessage warning = QDBusMessage::createError(QDBusError::Failed,
-        "Не удалось вызвать метод открытия файла: " + dbus_replay.error().message());
+        qDebug() << "Не удалось вызвать метод открытия файла: " + dbus_replay.error().message();
     }
 
 

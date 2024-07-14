@@ -1,17 +1,20 @@
+#ifndef DBUS_SERVICE_H
+#define DBUS_SERVICE_H
 #include <QtDBus/QtDBus>
 
-class DBusService : public QDBusAbstractAdaptor
+class DBusService : public QDBusAbstractAdaptor,  public QDBusContext
 {
     Q_OBJECT
-    Q_CLASSINFO("sharing_dbus_service","com.system.sharing")
+    Q_CLASSINFO("D-Bus Interface","com.system.sharing")
 public:
         explicit DBusService(QObject* parent);
 public slots:
-    void RegisterService(const QString& name, const QString& pathToExe, const QStringList& supportedFormats);
-    void OpenFile(const QString &path);
-    void OpenFileUsingService(const QString &path, const QString &service);
+    Q_INVOKABLE void RegisterService(const QString& name, const QString& pathToExe, const QStringList& supportedFormats);
+    Q_INVOKABLE void OpenFile(const QString &path);
+    Q_INVOKABLE void OpenFileUsingService(const QString &path, const QString &service);
 
-private:
-    //QMap<QString, QStringList> registeredServices;
+signals:
+    void errorOccurred(const QString &message);
 };
 
+#endif // DBUS_SERVICE_H
