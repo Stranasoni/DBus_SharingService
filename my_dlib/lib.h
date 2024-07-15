@@ -2,7 +2,6 @@
 
 class Request
 {
-
 public:
     Request(const QDBusMessage &msg, QObject *context);
     void sendErrorResponse(const QString &error) const;

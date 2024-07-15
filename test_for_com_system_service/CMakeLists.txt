@@ -5,7 +5,7 @@ project(text_editor VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_PREFIX_PATH "/opt/Qt/6.7.2/gcc_64")
+set(CMAKE_PREFIX_PATH "../external/gcc_64")
 
 find_package(Qt6 REQUIRED COMPONENTS Core DBus)
 

@@ -23,7 +23,7 @@ DBusService::DBusService(QObject* parent) : QDBusAbstractAdaptor(parent)
 void DBusService::RegisterService(const QString& name, const QString& pathToExe, const QStringList& supportedFormats)
 {
     //поиск среди зарегистрированных сервисов
-    QFile file("../registeredServices.txt");
+    QFile file("../src/registeredServices.txt");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text ))
     {
         qDebug()<<"Не удалось проверить список зарегистрированных сервисов, к сожалению в таком случае продолжить не можем";       
@@ -42,7 +42,6 @@ void DBusService::RegisterService(const QString& name, const QString& pathToExe,
         }
     }
     file.close();
-
     //содержимое конф файла
     QString configure_text =QString(
         "[D-BUS Service]\n"
@@ -56,7 +55,7 @@ void DBusService::RegisterService(const QString& name, const QString& pathToExe,
     file.setFileName(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        qDebug()<< "Не удалось зарегистрировать сервис";
+        qDebug()<< "Не удалось зарегистрировать сервис: нет прав доступа";
         return;
     }
     QTextStream out_conf_file(&file);
@@ -65,7 +64,7 @@ void DBusService::RegisterService(const QString& name, const QString& pathToExe,
     
     /*в специальном файле будут храниться имена
     зарегистрированных сервисов-обработчиков*/
-    file.setFileName("../registeredServices.txt");
+    file.setFileName("../src/registeredServices.txt");
     if(!file.open(QIODevice::Append | QIODevice::Text))
     {
         qDebug()<<"Сторонний сервис зарегистрирован, но информацию о его присутствие не удалось сохранить";
@@ -132,6 +131,7 @@ void DBusService::OpenFileUsingService(const QString &path, const QString &servi
     if(!dbus_replay.isValid())
     {
         qDebug()<<"Не удалось вызвать метод открытия файла: " + dbus_replay.error().message();
+        return;
     }
 
 
@@ -149,7 +149,7 @@ void DBusService::OpenFile(const QString &path)
     QString extension = QFileInfo(path).suffix();
 
     //поиск зарегистрированных сервисов поддерживающих заданное расширение
-    QFile my_reg_file("../registeredServices.txt");
+    QFile my_reg_file("../src/registeredServices.txt");
     if (!my_reg_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() <<  "Не удалось проверить список зарегистрированных сервисов";
         return;

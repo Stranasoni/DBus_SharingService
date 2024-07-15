@@ -7,13 +7,7 @@ SharingService::SharingService(const QString& serviceName, const QStringList& su
     : QDBusAbstractAdaptor(parent),
       m_serviceName(serviceName), m_supportedFormats(supportedFormats), 
       m_handler(handler), parent(parent)
-{
-   
-
-}
-
-//SharingService::~SharingService() = default;
-
+{}
 
 bool SharingService::start()
 {
@@ -53,7 +47,6 @@ bool SharingService::start()
         qDebug() <<"Не удалось зарегистрировать объект: " << dbus.lastError().message();
         return false;
     }
-
 
     qDebug() << "Сервис успешно запущен";
     return true;

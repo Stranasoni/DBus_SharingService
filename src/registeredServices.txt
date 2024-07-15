@@ -1,2 +1,0 @@
-com.example.texteditor
-com.example.SharingService
