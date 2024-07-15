@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/TestApp.dir/main.cpp.o  -o TestApp   -L/home/ubuntu/Documents/dbusold/my_lib/build  -Wl,-rpath,/home/ubuntu/Documents/dbusold/my_lib/build:/opt/Qt/6.7.2/gcc_64/lib -lSharingService /opt/Qt/6.7.2/gcc_64/lib/libQt6DBus.so.6.7.2 /opt/Qt/6.7.2/gcc_64/lib/libQt6Core.so.6.7.2 -pthread 

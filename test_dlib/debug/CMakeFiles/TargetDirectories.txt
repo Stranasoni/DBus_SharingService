@@ -1,3 +1,0 @@
-/home/ubuntu/Documents/dbusold/test_dlib/debug/CMakeFiles/rebuild_cache.dir
-/home/ubuntu/Documents/dbusold/test_dlib/debug/CMakeFiles/edit_cache.dir
-/home/ubuntu/Documents/dbusold/test_dlib/debug/CMakeFiles/TestApp.dir

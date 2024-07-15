@@ -1,7 +1,7 @@
 #include "dbus_service.h"
 #include <QtDBus/QDBusConnection>
 #include <QtDebug>
-#include <iostream>
+
 
 
 
@@ -23,7 +23,7 @@ DBusService::DBusService(QObject* parent) : QDBusAbstractAdaptor(parent)
 void DBusService::RegisterService(const QString& name, const QString& pathToExe, const QStringList& supportedFormats)
 {
     //поиск среди зарегистрированных сервисов
-    QFile file("/home/ubuntu/Documents/dbusold/src/registeredServices.txt");
+    QFile file("../registeredServices.txt");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text ))
     {
         qDebug()<<"Не удалось проверить список зарегистрированных сервисов, к сожалению в таком случае продолжить не можем";       
@@ -65,7 +65,7 @@ void DBusService::RegisterService(const QString& name, const QString& pathToExe,
     
     /*в специальном файле будут храниться имена
     зарегистрированных сервисов-обработчиков*/
-    file.setFileName("/home/ubuntu/Documents/dbusold/src/registeredServices.txt");
+    file.setFileName("../registeredServices.txt");
     if(!file.open(QIODevice::Append | QIODevice::Text))
     {
         qDebug()<<"Сторонний сервис зарегистрирован, но информацию о его присутствие не удалось сохранить";
@@ -149,7 +149,7 @@ void DBusService::OpenFile(const QString &path)
     QString extension = QFileInfo(path).suffix();
 
     //поиск зарегистрированных сервисов поддерживающих заданное расширение
-    QFile my_reg_file("/home/ubuntu/Documents/dbusold/src/registeredServices.txt");
+    QFile my_reg_file("../registeredServices.txt");
     if (!my_reg_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() <<  "Не удалось проверить список зарегистрированных сервисов";
         return;
